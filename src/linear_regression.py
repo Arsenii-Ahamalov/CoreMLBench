@@ -40,7 +40,6 @@ class LinearRegression:
             grad_w = (2/n_samples) * (X.T @ errors)
             grad_b = (2/n_samples) * errors.sum()
             
-            # Update parameters
             self.weights -= self.learning_rate * grad_w
             self.bias -= self.learning_rate * grad_b
 

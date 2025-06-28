@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from src.tree_regression_fixed import TreeRegression
+from src.tree_regression import TreeRegression
 
 def test_mse_vs_mae_criteria():
     """

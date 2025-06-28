@@ -1,4 +1,4 @@
-from tree import Tree
+from .tree import Tree
 import numpy as np
 import pandas as pd
 class TreeRegression:
@@ -14,27 +14,26 @@ class TreeRegression:
             current_node.is_leaf = True
             current_node.value = np.mean(y)
             return
-        best_score = float('inf')
         best_feature = None
         best_threshold = None
         current_score = float('inf')
-        for feachure in X.columns:
-            for threshold in X[feachure].unique():
-                left_data = X[X[feachure] < threshold]
-                right_data = X[X[feachure] >= threshold]
-                if len(min(len(left_data),len(right_data))) < self.min_samples_split:
+        for feature in X.columns:
+            for threshold in X[feature].unique():
+                left_data = X[X[feature] < threshold]
+                right_data = X[X[feature] >= threshold]
+                if min(len(left_data),len(right_data)) < self.min_samples_split:
                     continue
                 if self.criterion == 'mse':
-                    left_score = np.mean((y[left_data.index] - np.mean(y[left_data.index])) ** 2)
-                    right_score = np.mean((y[right_data.index] - np.mean(y[right_data.index])) ** 2)
+                    left_score = self.__mse(y[left_data.index])
+                    right_score = self.__mse(y[right_data.index])
                     score = left_score + right_score
                 else:
-                    left_score = np.mean(np.abs(left_data - y[left_data.index]))
-                    right_score = np.mean(np.abs(right_data - y[right_data.index]))
+                    left_score = self.__mae(y[left_data.index])
+                    right_score = self.__mae(y[right_data.index])
                     score = left_score + right_score
                 if score < current_score:
                     current_score = score
-                    best_feature = feachure
+                    best_feature = feature
                     best_threshold = threshold
         if best_feature is None:
             current_node.is_leaf = True
@@ -46,6 +45,8 @@ class TreeRegression:
             current_node.is_leaf = False
             current_node.left = Tree(self.max_depth)
             current_node.right = Tree(self.max_depth)
+            current_node.left.current_depth = current_node.current_depth + 1
+            current_node.right.current_depth = current_node.current_depth + 1
             self.__build_tree(left_data,y[left_data.index],current_node.left)
             self.__build_tree(right_data,y[right_data.index],current_node.right)
     def fit(self,X,y):
@@ -66,9 +67,13 @@ class TreeRegression:
     def score(self,X,y):
         predictions = self.predict(X)
         if self.criterion == 'mse':
-            mse_score = np.mean((predictions - y) ** 2)
+            mse_score = self.__mse(y)   
             print(f"MSE score: {mse_score}")
         elif self.criterion == 'mae':
-            mae_score = np.mean(np.abs(predictions - y))
+            mae_score = self.__mae(y)
             print(f"MAE score: {mae_score}")
         return mse_score if self.criterion == 'mse' else mae_score
+    def __mse(self, y):
+        return np.mean((y - np.mean(y)) ** 2)
+    def __mae(self, y):
+        return np.mean(np.abs(y - np.mean(y)))

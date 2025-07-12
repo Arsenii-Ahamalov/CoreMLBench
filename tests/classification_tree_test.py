@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from src.classification_tree import ClassificationTree
+from src.tree_classifier import TreeClassifier
 
 def test_gini_vs_entropy_criteria():
     """
@@ -14,12 +14,12 @@ def test_gini_vs_entropy_criteria():
     y = pd.Series(np.random.choice([0, 1], 50), name="y")
 
     # Test Gini criterion
-    model_gini = ClassificationTree(max_depth=3, min_samples_split=2, criterion='gini')
+    model_gini = TreeClassifier(max_depth=3, min_samples_split=2, criterion='gini')
     model_gini.fit(X, y)
     gini_score = model_gini.score(X, y)
 
     # Test Entropy criterion
-    model_entropy = ClassificationTree(max_depth=3, min_samples_split=2, criterion='entropy')
+    model_entropy = TreeClassifier(max_depth=3, min_samples_split=2, criterion='entropy')
     model_entropy.fit(X, y)
     entropy_score = model_entropy.score(X, y)
 
@@ -33,7 +33,7 @@ def test_predict_and_score_return_types():
     X = pd.DataFrame({"x1": [1, 2, 3], "x2": [4, 5, 6]})
     y = pd.Series([0, 1, 0], name="y")
 
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     model.fit(X, y)
 
     preds = model.predict(X)
@@ -54,7 +54,7 @@ def test_constant_target_values():
     })
     y = pd.Series(np.ones(20), name="y")  # All ones
 
-    model = ClassificationTree(max_depth=3, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=3, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -71,7 +71,7 @@ def test_max_depth_limitation():
     })
     y = pd.Series([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=1, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=1, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     # With max_depth=1, tree should have at most 2 leaf nodes
@@ -90,7 +90,7 @@ def test_min_samples_split():
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
     # With min_samples_split=6, should not split much
-    model = ClassificationTree(max_depth=3, min_samples_split=6, criterion='gini')
+    model = TreeClassifier(max_depth=3, min_samples_split=6, criterion='gini')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -114,7 +114,7 @@ def test_hyperparam_variations(max_depth, min_samples_split, criterion):
     })
     y = pd.Series(np.random.choice([0, 1], 20), name="y")
 
-    model = ClassificationTree(max_depth=max_depth, min_samples_split=min_samples_split, criterion=criterion)
+    model = TreeClassifier(max_depth=max_depth, min_samples_split=min_samples_split, criterion=criterion)
     model.fit(X, y)
     score = model.score(X, y)
     
@@ -130,7 +130,7 @@ def test_constructor_invalid_params(max_depth, min_samples_split, criterion):
     Constructor should raise ValueError for invalid initialization parameters.
     """
     with pytest.raises(ValueError):
-        ClassificationTree(max_depth=max_depth, min_samples_split=min_samples_split, criterion=criterion)
+        TreeClassifier(max_depth=max_depth, min_samples_split=min_samples_split, criterion=criterion)
 
 def test_single_feature():
     """
@@ -139,7 +139,7 @@ def test_single_feature():
     X = pd.DataFrame({"x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
     y = pd.Series([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     # Test prediction on a new point
@@ -156,7 +156,7 @@ def test_large_scale_performance():
     X = pd.DataFrame(rng.rand(n_samples, 3), columns=["a", "b", "c"])
     y = pd.Series(rng.choice([0, 1, 2], n_samples), name="y")
     
-    model = ClassificationTree(max_depth=5, min_samples_split=10, criterion='gini')
+    model = TreeClassifier(max_depth=5, min_samples_split=10, criterion='gini')
     model.fit(X, y)
     
     # Test on a subset
@@ -178,7 +178,7 @@ def test_edge_case_max_depth_one():
     })
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=1, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=1, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -197,7 +197,7 @@ def test_negative_values():
     })
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -213,7 +213,7 @@ def test_multiclass_classification():
     })
     y = pd.Series(np.random.choice([0, 1, 2], 30), name="y")
 
-    model = ClassificationTree(max_depth=3, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=3, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -230,7 +230,7 @@ def test_perfect_separation():
     })
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -241,32 +241,32 @@ def test_gini_calculation():
     """
     Test that Gini impurity calculation is correct.
     """
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     
     # Test with pure class (all same values)
     y_pure = pd.Series([1, 1, 1, 1])
-    gini_pure = model._ClassificationTree__gini(y_pure)
+    gini_pure = model._TreeClassifier__gini(y_pure)
     assert gini_pure == 0.0  # Pure class should have 0 impurity
     
     # Test with mixed classes
     y_mixed = pd.Series([0, 0, 1, 1])
-    gini_mixed = model._ClassificationTree__gini(y_mixed)
+    gini_mixed = model._TreeClassifier__gini(y_mixed)
     assert 0.0 < gini_mixed < 1.0  # Mixed classes should have impurity > 0
 
 def test_entropy_calculation():
     """
     Test that Entropy calculation is correct.
     """
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='entropy')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='entropy')
     
     # Test with pure class (all same values)
     y_pure = pd.Series([1, 1, 1, 1])
-    entropy_pure = model._ClassificationTree__entropy(y_pure)
+    entropy_pure = model._TreeClassifier__entropy(y_pure)
     assert entropy_pure == 0.0  # Pure class should have 0 entropy
     
     # Test with mixed classes
     y_mixed = pd.Series([0, 0, 1, 1])
-    entropy_mixed = model._ClassificationTree__entropy(y_mixed)
+    entropy_mixed = model._TreeClassifier__entropy(y_mixed)
     assert 0.0 < entropy_mixed < 2.0  # Mixed classes should have entropy > 0
 
 def test_empty_splits():
@@ -279,7 +279,7 @@ def test_empty_splits():
     })
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=3, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=3, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     # Should handle this gracefully and create a leaf node
@@ -293,7 +293,7 @@ def test_single_sample():
     X = pd.DataFrame({"x": [1]})
     y = pd.Series([0], name="y")
 
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     pred = model.predict(X)
@@ -310,7 +310,7 @@ def test_consistency_between_predict_and_predict_one():
     })
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
-    model = ClassificationTree(max_depth=2, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=2, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     preds_batch = model.predict(X)
@@ -328,7 +328,7 @@ def test_score_method_consistency():
     })
     y = pd.Series(np.random.choice([0, 1], 20), name="y")
 
-    model = ClassificationTree(max_depth=3, min_samples_split=2, criterion='gini')
+    model = TreeClassifier(max_depth=3, min_samples_split=2, criterion='gini')
     model.fit(X, y)
     
     score1 = model.score(X, y)

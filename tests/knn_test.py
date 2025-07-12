@@ -13,7 +13,7 @@ def test_perfect_classification_2d():
     })
     y = pd.Series([0, 0, 0, 0, 1, 1, 1, 1], name="y")
 
-    model = KNN(neighbours=3, p=2, task_class='c')
+    model = KNN(n_neighbors=3, p=2, task_class='c')
     model.fit(X, y)
     preds = model.predict(X)
 
@@ -27,7 +27,7 @@ def test_regression_perfect_linear():
     X = pd.DataFrame({"x": np.arange(10)})
     y = pd.Series(2 * X["x"] + 1, name="y")  # y = 2x + 1
 
-    model = KNN(neighbours=3, p=2, task_class='r')
+    model = KNN(n_neighbors=3, p=2, task_class='r')
     model.fit(X, y)
     preds = model.predict(X)
     
@@ -46,12 +46,12 @@ def test_manhattan_vs_euclidean():
     y = pd.Series([0, 0, 0, 1, 1, 1], name="y")
 
     # Test Manhattan distance (p=1)
-    model_l1 = KNN(neighbours=3, p=1, task_class='c')
+    model_l1 = KNN(n_neighbors=3, p=1, task_class='c')
     model_l1.fit(X, y)
     acc_l1 = model_l1.score(X, y)
 
     # Test Euclidean distance (p=2)
-    model_l2 = KNN(neighbours=3, p=2, task_class='c')
+    model_l2 = KNN(n_neighbors=3, p=2, task_class='c')
     model_l2.fit(X, y)
     acc_l2 = model_l2.score(X, y)
 
@@ -65,7 +65,7 @@ def test_predict_and_score_return_types():
     X = pd.DataFrame({"x1": [0, 1, 2], "x2": [0, 1, 2]})
     y = pd.Series([0, 0, 1], name="y")
 
-    model = KNN(neighbours=2, p=2, task_class='c')
+    model = KNN(n_neighbors=2, p=2, task_class='c')
     model.fit(X, y)
 
     preds = model.predict(X)
@@ -86,7 +86,7 @@ def test_all_same_class():
     })
     y = pd.Series(np.ones(20, dtype=int), name="y")  # All ones
 
-    model = KNN(neighbours=3, p=2, task_class='c')
+    model = KNN(n_neighbors=3, p=2, task_class='c')
     model.fit(X, y)
     preds = model.predict(X)
 
@@ -100,7 +100,7 @@ def test_k_larger_than_data():
     X = pd.DataFrame({"x": [1, 2, 3]})
     y = pd.Series([0, 1, 0], name="y")
 
-    model = KNN(neighbours=5, p=2, task_class='c')  # k=5 > n=3
+    model = KNN(n_neighbors=5, p=2, task_class='c')  # k=5 > n=3
     model.fit(X, y)
     
     # Should not crash and should return valid predictions
@@ -108,13 +108,13 @@ def test_k_larger_than_data():
     assert len(preds) == 3
     assert all(pred in [0, 1] for pred in preds)
 
-@pytest.mark.parametrize("neighbours, p, task_class", [
+@pytest.mark.parametrize("n_neighbors, p, task_class", [
     (3, 1, 'c'),
     (5, 2, 'c'),
     (3, 1, 'r'),
     (5, 2, 'r'),
 ])
-def test_hyperparam_variations(neighbours, p, task_class):
+def test_hyperparam_variations(n_neighbors, p, task_class):
     """
     Ensure KNN runs under different hyperparameters and returns valid results.
     """
@@ -127,7 +127,7 @@ def test_hyperparam_variations(neighbours, p, task_class):
     else:
         y = pd.Series(np.random.rand(10), name="y")
 
-    model = KNN(neighbours=neighbours, p=p, task_class=task_class)
+    model = KNN(n_neighbors=n_neighbors, p=p, task_class=task_class)
     model.fit(X, y)
     score = model.score(X, y)
     
@@ -136,18 +136,18 @@ def test_hyperparam_variations(neighbours, p, task_class):
     else:
         assert score >= 0.0  # MSE
 
-@pytest.mark.parametrize("neighbours, p, weights, task_class", [
-    (0, 1, "uniform", 'c'),      # neighbours <= 0
+@pytest.mark.parametrize("n_neighbors, p, weights, task_class", [
+    (0, 1, "uniform", 'c'),      # n_neighbors <= 0
     (3, 3, "uniform", 'c'),      # p not in (1,2)
     (3, 1, "invalid", 'c'),      # weights not in ("uniform","distance")
     (3, 1, "uniform", 'x'),      # task_class not in ('c','r')
 ])
-def test_constructor_invalid_params(neighbours, p, weights, task_class):
+def test_constructor_invalid_params(n_neighbors, p, weights, task_class):
     """
     Constructor should raise ValueError for invalid initialization parameters.
     """
     with pytest.raises(ValueError):
-        KNN(neighbours=neighbours, p=p, weights=weights, task_class=task_class)
+        KNN(n_neighbors=n_neighbors, p=p, weights=weights, task_class=task_class)
 
 def test_regression_constant_values():
     """
@@ -159,7 +159,7 @@ def test_regression_constant_values():
     })
     y = pd.Series(np.ones(10) * 5.0, name="y")  # Constant value
 
-    model = KNN(neighbours=3, p=2, task_class='r')
+    model = KNN(n_neighbors=3, p=2, task_class='r')
     model.fit(X, y)
     preds = model.predict(X)
     
@@ -176,7 +176,7 @@ def test_classification_tie_breaking():
     })
     y = pd.Series([0, 0, 0, 1, 1, 1], name="y")
 
-    model = KNN(neighbours=2, p=2, task_class='c')
+    model = KNN(n_neighbors=2, p=2, task_class='c')
     model.fit(X, y)
     
     # Test prediction on a point equidistant from both classes
@@ -194,7 +194,7 @@ def test_large_scale_performance():
     X = pd.DataFrame(rng.rand(n_samples, 3), columns=["a", "b", "c"])
     y = pd.Series(rng.randint(0, 3, n_samples), name="y")  # 3 classes
     
-    model = KNN(neighbours=5, p=2, task_class='c')
+    model = KNN(n_neighbors=5, p=2, task_class='c')
     model.fit(X, y)
     
     # Test on a subset
@@ -213,7 +213,7 @@ def test_single_feature():
     X = pd.DataFrame({"x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
     y = pd.Series([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], name="y")
 
-    model = KNN(neighbours=3, p=1, task_class='c')
+    model = KNN(n_neighbors=3, p=1, task_class='c')
     model.fit(X, y)
     
     # Test prediction on a point in the middle
@@ -231,7 +231,7 @@ def test_edge_case_k_equals_one():
     })
     y = pd.Series([0, 1, 0, 1], name="y")
 
-    model = KNN(neighbours=1, p=2, task_class='c')
+    model = KNN(n_neighbors=1, p=2, task_class='c')
     model.fit(X, y)
     
     # With k=1, prediction should be exactly the label of the nearest neighbor

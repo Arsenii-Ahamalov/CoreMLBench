@@ -41,9 +41,9 @@ class LogisticRegression:
         return right_predictions/y.size
     def __sigmoid(self,x):
         return 1/(1+np.exp(-x))
-    def score(self,X,y):
+    def score(self, X, y):
         prediction = self.predict(X)
-        accuracy_score = self.__accuracy(prediction,y)
-        print(f"Model accuracy == {accuracy_score}")
+        y_true = y.values if hasattr(y, 'values') else y
+        accuracy_score = np.mean(prediction == y_true)
         return accuracy_score
     

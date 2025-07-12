@@ -14,12 +14,12 @@ def test_mse_vs_mae_criteria():
     y = pd.Series(3 * X["x1"] + 2 * X["x2"] + np.random.normal(0, 0.1, 50), name="y")
 
     # Test MSE criterion
-    model_mse = TreeRegression(max_depth=3, min_samples_split=2, criterion='mse')
+    model_mse = TreeRegression(max_depth=3, min_samples_split=2, criterion='squared_error')
     model_mse.fit(X, y)
     mse_score = model_mse.score(X, y)
 
     # Test MAE criterion
-    model_mae = TreeRegression(max_depth=3, min_samples_split=2, criterion='mae')
+    model_mae = TreeRegression(max_depth=3, min_samples_split=2, criterion='absolute_error')
     model_mae.fit(X, y)
     mae_score = model_mae.score(X, y)
 
@@ -33,7 +33,7 @@ def test_predict_and_score_return_types():
     X = pd.DataFrame({"x1": [1, 2, 3], "x2": [4, 5, 6]})
     y = pd.Series([10, 20, 30], name="y")
 
-    model = TreeRegression(max_depth=2, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=2, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
 
     preds = model.predict(X)
@@ -54,7 +54,7 @@ def test_constant_target_values():
     })
     y = pd.Series(np.ones(20) * 5.0, name="y")  # Constant value
 
-    model = TreeRegression(max_depth=3, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=3, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -71,7 +71,7 @@ def test_max_depth_limitation():
     })
     y = pd.Series(np.arange(10), name="y")
 
-    model = TreeRegression(max_depth=1, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=1, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
     
     # With max_depth=1, tree should have at most 2 leaf nodes
@@ -90,7 +90,7 @@ def test_min_samples_split():
     y = pd.Series([1, 2, 3, 4, 5, 6, 7, 8], name="y")
 
     # With min_samples_split=6, should not split much
-    model = TreeRegression(max_depth=3, min_samples_split=6, criterion='mse')
+    model = TreeRegression(max_depth=3, min_samples_split=6, criterion='squared_error')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -99,10 +99,10 @@ def test_min_samples_split():
     assert unique_predictions <= 4  # Reasonable upper bound
 
 @pytest.mark.parametrize("max_depth, min_samples_split, criterion", [
-    (2, 2, 'mse'),
-    (3, 3, 'mse'),
-    (2, 2, 'mae'),
-    (3, 3, 'mae'),
+    (2, 2, 'squared_error'),
+    (3, 3, 'squared_error'),
+    (2, 2, 'absolute_error'),
+    (3, 3, 'absolute_error'),
 ])
 def test_hyperparam_variations(max_depth, min_samples_split, criterion):
     """
@@ -121,8 +121,8 @@ def test_hyperparam_variations(max_depth, min_samples_split, criterion):
     assert score >= 0.0
 
 @pytest.mark.parametrize("max_depth, min_samples_split, criterion", [
-    (0, 2, 'mse'),      # max_depth <= 0
-    (2, 0, 'mse'),      # min_samples_split <= 0
+    (0, 2, 'squared_error'),      # max_depth <= 0
+    (2, 0, 'squared_error'),      # min_samples_split <= 0
     (2, 2, 'invalid'),  # invalid criterion
 ])
 def test_constructor_invalid_params(max_depth, min_samples_split, criterion):
@@ -139,7 +139,7 @@ def test_single_feature():
     X = pd.DataFrame({"x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]})
     y = pd.Series([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], name="y")
 
-    model = TreeRegression(max_depth=2, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=2, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
     
     # Test prediction on a new point
@@ -156,7 +156,7 @@ def test_large_scale_performance():
     X = pd.DataFrame(rng.rand(n_samples, 3), columns=["a", "b", "c"])
     y = pd.Series(1.5*X["a"] - 0.8*X["b"] + 2.2*X["c"] + rng.normal(0, 0.1, n_samples), name="y")
     
-    model = TreeRegression(max_depth=5, min_samples_split=10, criterion='mse')
+    model = TreeRegression(max_depth=5, min_samples_split=10, criterion='squared_error')
     model.fit(X, y)
     
     # Test on a subset
@@ -178,7 +178,7 @@ def test_edge_case_max_depth_one():
     })
     y = pd.Series([1, 1, 1, 1, 2, 2, 2, 2], name="y")
 
-    model = TreeRegression(max_depth=1, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=1, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -196,7 +196,7 @@ def test_categorical_like_features():
     })
     y = pd.Series([10, 12, 15, 18, 20, 22, 25, 28], name="y")
 
-    model = TreeRegression(max_depth=3, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=3, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
     
     preds = model.predict(X)
@@ -215,7 +215,7 @@ def test_negative_values():
     })
     y = pd.Series([-20, -16, -12, -8, -4, 0, 4, 8, 12, 16], name="y")
 
-    model = TreeRegression(max_depth=3, min_samples_split=2, criterion='mse')
+    model = TreeRegression(max_depth=3, min_samples_split=2, criterion='squared_error')
     model.fit(X, y)
     
     preds = model.predict(X)

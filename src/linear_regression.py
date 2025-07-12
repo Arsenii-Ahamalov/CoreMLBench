@@ -46,10 +46,15 @@ class LinearRegression:
     def predict(self, X):
         X_mat = X.values if isinstance(X, pd.DataFrame) else X
         return X_mat @ self.weights + self.bias
-
     def score(self, X, y):
         predictions = self.predict(X)
-        return self._mse(predictions, y.values if isinstance(y, pd.Series) else y)
+        y_true = y.values if isinstance(y, pd.Series) else y
+        mse = self._mse(predictions, y_true)
+        y_var = np.var(y_true)
+        if y_var == 0:
+            return 0.0
+        r2 = 1 - (mse / y_var)
+        return r2
 
     def _mse(self, y_pred, y_true):
         return np.mean((y_pred - y_true) ** 2)
